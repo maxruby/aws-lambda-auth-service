@@ -1,88 +1,88 @@
-<p align="center">
-  <img src="https://codingly-assets.s3-eu-west-1.amazonaws.com/Codingly+Logo.png" width="200px" height="200px"/>
-  </br>
-  <a href="https://codingly.io">codingly.io</a>
-  <br/>
-</p>
-<h1 align="center">Serverless Framework Auth0 Authorizer</h1>
-<p align="center">
-  <i><strong>A modern, ES6-friendly Lambda Authorizer ready for integration with Serverless Framework and Auth0.</strong></i>
-  <br/>
-  Based on the <a href="https://github.com/serverless/examples/tree/master/aws-node-auth0-custom-authorizers-api">serverless/examples/aws-node-auth0-custom-authorizers-api</a> example.
-</p>
+# Serverless Lambda Auth0 Authorizer
 
-## Features
+## Description
+A serverless framework ES6-friendly [Auth0](https://auth0.com) Lambda Authorizer, based on the [aws node auth0 custom authorizers](https://github.com/serverless/examples/tree/master/aws-node-auth0-custom-authorizers-api).
 
-- Test front-end application
-- Private endpoint for testing
-- Public endpoint for testing
-- ES6-friendly
+Features:
+- ES6 friendly
+- Allows rapid integration & testing Frontend applications
+- Provides private endpoint for testing
+- Provides public endpoint for testing
+  
+## Dependencies
 
-## Getting started
+* [serverless-bundle plugin](https://www.npmjs.com/package/serverless-pseudo-parameters): Webpack plugin providing zero configuration for bundling JavaScript including modern ES6/ES7 features.
 
-### 1. Clone the repository (or generate a serverless project)
-```sh
-sls create --name auth-service --template-url https://github.com/codingly-io/serverless-auth0-authorizer
-cd auth-service
+## Setup
+
+- Created service using [codingly.io](https://github.com/codingly-io/sls-base) as follows:
+
+```shell
+$ sls create --name auth-service --template-url https://github.com/codingly-io/serverless-auth0-authorizer
+$ cd auth-service
+$ npm install
 ```
 
-### 2. Install dependencies
+- Created `secret.pem` file which contains the Auth0 public certificate used to verify tokens.
+ - copied public certificate from `berlin-sls-auction.eu.auth0.com ` to `secret.pem` file in the root folder of this project.
 
-```sh
-npm install
+## Deployment
+```shell
+$ sls deploy -v
 ```
-
-### 3. Create `secret.pem` file
-
-This file will contain your Auth0 public certificate, used to verify tokens.
-
-Create a `secret.pem` file in the root folder of this project. Simply paste your public certificate in there.
-
-### 4. Deploy the stack
-
-We need to deploy the stack in order to consume the private/public testing endpoints.
-
-```sh
-sls deploy -v
-```
-
-### 5. Final test
-
-To make sure everything works, send a POST request (using curl, Postman etc.) to your private endpoint.
-
-You can grab a test token from Auth0. Make sure to provide your token in the headers like so:
-
-```
-"Authorization": "Bearer YOUR_TOKEN"
-```
-
-You should be good to go!
-
-<hr/>
-
-## Bonus: Cross-stack authorization
-
-This is very useful in a microservices setup. For example, you have an Auth Service (this service) which owns anything auth/user-related, and a bunch of other services that require user authorization.
-Fear not, it is very easy to make your authorizer work anywhere else in your AWS account.
-
-When defining your Lambdas in other services, simply define the `authorizer` as well and provide the ARN of your `auth` function (can be found in the AWS Console or via `sls info`).
-
-#### Example:
-
-```yaml
-functions:
-  someFunction:
-    handler: src/handlers/someFunction.handler
-    events:
-      - http:
-          method: POST
-          path: /something
-          authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:sls-auth-service-draft-dev-auth
-```
-
-If everything was set up correctly, all incoming requests to your `someFunction` Lambda will first be authorized. You can find the JWT claims at `event.requestContext.authorizer`.
 
 ## Auth service endpoints
+- `POST` https://gjitqn0le8.execute-api.eu-west-1.amazonaws.com/dev/public
+- `POST` https://gjitqn0le8.execute-api.eu-west-1.amazonaws.com/dev/private
 
-  POST - https://gjitqn0le8.execute-api.eu-west-1.amazonaws.com/dev/public
-  POST - https://gjitqn0le8.execute-api.eu-west-1.amazonaws.com/dev/private
+## Testing
+Use POSTMAN collection, e.g:
+
+`auth0_domain`: berlin-sls-auction.eu.auth0.com
+
+`POST` https://{{auth0_domain}}/oauth/token
+
+Set the body form params (x-www-form-urlencoded):
+- client_secret: `auth0 client secret`
+- username: `auth0 email`
+- password: `auth0 password`
+- scope: `openid`
+
+```json
+{
+    "access_token": "B-sRL4c-3pqj-0PP_A3fk0WoLM0mG-VM",
+    "id_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImpxRnR1X3FFWTY3OFBnTUhqVWRIcSJ9.eyJuaWNrbmFtZSI6Im14c3N0cjkzIiwibmFtZSI6Im14c3N0cjkzQGdtYWlsLmNvbSIsInBpY3R1cmUiOiJodHRwczovL3MuZ3JhdmF0YXIuY29tL2F2YXRhci85YWRkZTQ4YzAwZWU0YjQ2NjcwMzU5ODgyMWVlZjY5ZD9zPTQ4MCZyPXBnJmQ9aHR0cHMlM0ElMkYlMkZjZG4uYXV0aDAuY29tJTJGYXZhdGFycyUyRm14LnBuZyIsInVwZGF0ZWRfYXQiOiIyMDIwLTEyLTI3VDIxOjAyOjA5LjE4N1oiLCJlbWFpbCI6Im14c3N0cjkzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly9iZXJsaW4tc2xzLWF1Y3Rpb24uZXUuYXV0aDAuY29tLyIsInN1YiI6ImF1dGgwfDVmZTU1MWQ2MTI4ZjlmMDA2OTljOWIxMSIsImF1ZCI6ImtMWnhyeDNrN25NVk5TUGxaeXJ1T0FFWk9BMjB0SUJJIiwiaWF0IjoxNjA5MTAyOTI5LCJleHAiOjE2MDkxMzg5Mjl9.OLI8okd3kn0YtyQs1gXUslwIkb4N-SJz5zyXVwPs8ofvvOC8GFbKvF6PD_6aQFrCovNvKEJBM8_mEN3tr7J5ASzhzkeg8uvp7McV1zqqxyBGVO9gJKP-_vMBCzD2euWRHrprKLja-eHutiwnYKS86zWTAA_VCvMm3TWdtjpvO_A8w6sNxP7rjslo_JqhZPzAE5uIX_0h_4N2ANC_NPqan8K1Bs6RX1G2ODF_P93TCOQb78fYt4z5tylto2eMcWK4DbYxLB4nJO22tjgv0rTB5ZPnrM5xPXzknIFfx06d8-MUf6y7iKslycxVqfBzXfyEgLsSXPa4xCXTKyYrYIAQoA",
+    "scope": "openid profile email address phone",
+    "expires_in": 86400,
+    "token_type": "Bearer"
+}
+```
+
+Copy the `id_token` from above and use it as variabke in the `Authorization` Header as follows:
+
+```json
+"Authorization": "{{AUTH_TOKEN}}"
+```
+
+## How use in AWS lambda serverless services
+
+In the IaC definition of Lambdas services, simply add the `authorizer` ARN of the `auth` function, e.g.
+
+```shell
+$ sls info
+```
+
+Alternatively, you can get the ARN from the AWS Console.
+
+Example:
+
+```yaml
+placeBid:
+  handler: src/handlers/placeBid.handler
+  events:
+    - http:
+        method: PATCH
+        path: /auctions/{id}/bid
+        cors: true
+        authorizer: ${self:custom.authorizer}
+```

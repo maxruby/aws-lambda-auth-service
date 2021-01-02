@@ -1,5 +1,5 @@
 {
-  "name": "auth-service",
+  "name": "aws-lambda-auth-service",
   "version": "1.0.0",
   "author": "Maximiliano Suster <mxsstr93@gmail.com>",
   "description": "Serverless Lambda Function for Authentication with auth0",
