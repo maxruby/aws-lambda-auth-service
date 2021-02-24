@@ -6,6 +6,8 @@ plugins:
 
 provider:
   name: aws
+  apiGateway:
+    shouldStartNameWithService: true
   runtime: nodejs12.x
   memorySize: 128
   region: eu-west-1
